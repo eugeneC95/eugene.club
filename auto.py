@@ -9,7 +9,7 @@ prefs = {"profile.managed_default_content_settings.images":2}
 
 options.add_experimental_option("prefs",prefs)
 options.add_argument("--window-size=100,150")#--start-maximized
-driver = webdriver.Chrome("D:/Documents/Career/eugene.club/chromedriver.exe",options=options)
+driver = webdriver.Chrome("S:/Career/eugene.club/chromedriver.exe",options=options)
 
 db = pymysql.connect(host='206.189.90.203',user='zun95',passwd='Hotdilvin95',db='h')
 cursor = db.cursor()
@@ -77,8 +77,8 @@ def main(j):
             print(str(i)+"error")
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
-for j in range(1,15):
-    if j == 11:
-        j=1
-    main(j)
     j = j+1
+    if j >= 10:
+        j = 1
+    main(j)
+main(1)
