@@ -13,14 +13,14 @@ driver = webdriver.Chrome("D:/Documents/Career/eugene.club/chromedriver.exe",opt
 
 db = pymysql.connect(host='206.189.90.203',user='zun95',passwd='Hotdilvin95',db='h')
 cursor = db.cursor()
-def insert(tit,aut,page,tsrc,isrc,date):
+def insert(tit,aut,page,tsrc,isrc,tp,date):
     try:
-        cursor.execute("INSERT into post(title,author,page,t_src,i_src,created_date) VALUES(%s ,%s ,%s, %s, %s, %s)",(tit,aut,page,tsrc,isrc,date))
+        cursor.execute("INSERT into post(title,author,page,t_src,i_src,i_type,created_date) VALUES(%s ,%s ,%s, %s, %s, %s, %s)",(tit,aut,page,tsrc,isrc,tp,date))
         db.commit()
     except:
         print('error inserting')
         db.rollback()
-def check(x,i,j,k,l,m,n):
+def check(x,i,j,k,l,m,n,o):
     try:
         cursor.execute("SELECT * FROM post WHERE t_src LIKE %s ORDER BY created_date ASC",(x))
         datas = cursor.fetchall()
@@ -28,7 +28,7 @@ def check(x,i,j,k,l,m,n):
             print("Data Already saved in DB")
         else:
             #donothings
-            insert(i,j,k,l,m,n)
+            insert(i,j,k,l,m,n,o)
             print("insert new data to table")
     except:
         print ("Error getting data for check")
@@ -54,14 +54,19 @@ def main(j):
                 page= driver.find_elements_by_xpath("//div[@class='container']//div[@class='thumb-container']")
                 page=len(page)
                 cover= driver.find_element_by_xpath("//div[@id='cover']//img[1]").get_attribute('data-src')
+                if "png" in cover:
+                    type='png'
+                elif "jpg" in cover:
+                    type='jpg'
                 img_nos= cover.split("https://t.nhentai.net/galleries/")
-                img_no= img_nos[1].split("/cover.jpg")
+                img_no= img_nos[1].split("/cover")
                 img= "https://i.nhentai.net/galleries/"+str(img_no[0])+"/"
                 date= driver.find_element_by_xpath("//div[@id='info']//div[2]//time").get_attribute('datetime')
                 date1=date.split("T")
                 date2=date1[1].split(".")
                 fdate =date1[0]+" "+date2[0]
-                check(cover,title,artist[0],page,cover,img,fdate)
+                print(cover,img)
+                check(cover,title,artist[0],page,cover,img,type,fdate)
                 time.sleep(0.5)
                 driver.close()
                 driver.switch_to.window(driver.window_handles[0])
