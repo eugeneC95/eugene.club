@@ -75,6 +75,8 @@ def main(j):
                 print(str(i)+"no Chinese file")
         except NoSuchElementException:
             print(str(i)+"error")
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
 for j in range(1,15):
     if j == 11:
         j=1
