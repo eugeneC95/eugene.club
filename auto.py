@@ -20,12 +20,12 @@ def insert(tit,aut,page,tsrc,isrc,tp,date):
     except:
         print('error inserting')
         db.rollback()
-def check(x,i,j,k,l,m,n,o):
+def check(x,y,i,j,k,l,m,n,o):
     try:
-        cursor.execute("SELECT * FROM post WHERE t_src LIKE %s ORDER BY created_date ASC",(x))
+        cursor.execute("SELECT * FROM post WHERE t_src LIKE %s OR title LIKE %s ORDER BY created_date ASC",(x,y))
         datas = cursor.fetchall()
         for data in datas:
-            print(data[4])
+            print("Found data: "+data[4])
         if len(datas) >= 1:
             print("Data Already saved in DB")
         else:
@@ -36,14 +36,14 @@ def check(x,i,j,k,l,m,n,o):
         driver.close()
 def main(j):
     #link = "https://nhentai.net/tag/stockings/?page="+str(j)
-    link = "https://nhentai.net/?page="+str(j)
+    link = "https://nhentai.net/tag/stockings/?page="+str(j)
     driver.get(link);
     time.sleep(1)
     box = driver.find_elements_by_class_name('gallery')
     for i in range(1,len(box)):
         try:
             texts = driver.find_element_by_xpath("//div[@class='container index-container']//div["+str(i)+"]//a").text
-            if("Chinese" in texts):
+            if(("Chinese" or "化") in texts):
                 link = driver.find_element_by_xpath("//div[@class='container index-container']//div["+str(i)+"]//a[1]").get_attribute("href")
                 driver.execute_script("window.open('');")
                 driver.switch_to.window(driver.window_handles[1])
@@ -66,7 +66,7 @@ def main(j):
                 date2=date1[1].split(".")
                 fdate =date1[0]+" "+date2[0]
                 print(cover)
-                check(cover,title,artist[0],page,cover,img,type,fdate)
+                check(cover,title,title,artist[0],page,cover,img,type,fdate)
                 time.sleep(0.5)
                 driver.close()
                 driver.switch_to.window(driver.window_handles[0])
@@ -78,7 +78,7 @@ def main(j):
             driver.switch_to.window(driver.window_handles[0])
 
     j = j+1
-    if j >= 10:
+    if j >= 20:
         j = 1
     main(j)
 main(1)
