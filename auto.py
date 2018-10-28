@@ -9,13 +9,13 @@ prefs = {"profile.managed_default_content_settings.images":2}
 
 options.add_experimental_option("prefs",prefs)
 options.add_argument("--window-size=100,150")#--start-maximized
-driver = webdriver.Chrome("S:/Career/eugene.club/chromedriver.exe",options=options)
+driver = webdriver.Chrome("D:/Documents/Career/eugene.club/chromedriver.exe",options=options)
 
 db = pymysql.connect(host='206.189.90.203',user='zun95',passwd='Hotdilvin95',db='h')
 cursor = db.cursor()
 def insert(tit,aut,page,tsrc,isrc,tp,date):
     try:
-        cursor.execute("INSERT into post(title,author,page,t_src,i_src,i_type,created_date) VALUES(%s ,%s ,%s, %s, %s, %s, %s)",(tit,aut,page,tsrc,isrc,tp,date))
+        cursor.execute("INSERT into post(title,author,page,t_src,i_no,i_type,created_date) VALUES(%s ,%s ,%s, %s, %s, %s, %s)",(tit,aut,page,tsrc,isrc,tp,date))
         db.commit()
     except:
         print('error inserting')
@@ -24,10 +24,11 @@ def check(x,i,j,k,l,m,n,o):
     try:
         cursor.execute("SELECT * FROM post WHERE t_src LIKE %s ORDER BY created_date ASC",(x))
         datas = cursor.fetchall()
-        if len(datas) > 1:
+        for data in datas:
+            print(data[4])
+        if len(datas) >= 1:
             print("Data Already saved in DB")
         else:
-            #donothings
             insert(i,j,k,l,m,n,o)
             print("insert new data to table")
     except:
@@ -42,7 +43,6 @@ def main(j):
     for i in range(1,len(box)):
         try:
             texts = driver.find_element_by_xpath("//div[@class='container index-container']//div["+str(i)+"]//a").text
-            print(texts)
             if("Chinese" in texts):
                 link = driver.find_element_by_xpath("//div[@class='container index-container']//div["+str(i)+"]//a[1]").get_attribute("href")
                 driver.execute_script("window.open('');")
@@ -60,25 +60,26 @@ def main(j):
                     type='jpg'
                 img_nos= cover.split("https://t.nhentai.net/galleries/")
                 img_no= img_nos[1].split("/cover")
-                img= "https://i.nhentai.net/galleries/"+str(img_no[0])+"/"
+                img= str(img_no[0])
                 date= driver.find_element_by_xpath("//div[@id='info']//div[2]//time").get_attribute('datetime')
                 date1=date.split("T")
                 date2=date1[1].split(".")
                 fdate =date1[0]+" "+date2[0]
-                print(cover,img)
+                print(cover)
                 check(cover,title,artist[0],page,cover,img,type,fdate)
                 time.sleep(0.5)
                 driver.close()
                 driver.switch_to.window(driver.window_handles[0])
-                print("\n")
             else:
-                print(str(i)+"no Chinese file")
+                print(str(i)+" no Chinese file")
         except NoSuchElementException:
             print(str(i)+"error")
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
+
     j = j+1
     if j >= 10:
         j = 1
     main(j)
 main(1)
+db.close()
