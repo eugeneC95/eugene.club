@@ -24,13 +24,13 @@ def check(x,y,z,i,j,k,l,m,n,o):
     try:
         cursor.execute("SELECT * FROM post WHERE t_src LIKE %s OR title LIKE %s ORDER BY created_date ASC",(x,y))
         datas = cursor.fetchall()
-        cursor.execute("SELECT * FROM blacklist WHERE i_no = %s",z)
+        cursor.execute("SELECT * FROM blacklist WHERE i_no = %s",(z))
         blacks = cursor.fetchall()
         for data in datas:
             print("Found data: "+data[4])
-        if len(datas):
+        if len(datas) >= 1:
             print("Data Already saved in DB")
-        elif len(blacks) >= '1':
+        elif len(blacks) >= 1:
             print("Data Blacklisted")
         else:
             insert(i,j,k,l,m,n,o)
