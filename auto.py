@@ -8,7 +8,7 @@ options = webdriver.ChromeOptions()
 prefs = {"profile.managed_default_content_settings.images":2}
 
 options.add_experimental_option("prefs",prefs)
-options.add_argument("--window-size=100,150")#--start-maximized
+options.add_argument("--window-size=650,150")#--start-maximized
 driver = webdriver.Chrome("D:/Documents/Career/eugene.club/chromedriver.exe",options=options)
 
 db = pymysql.connect(host='206.189.90.203',user='zun95',passwd='Hotdilvin95',db='h')
@@ -20,23 +20,25 @@ def insert(tit,aut,page,tsrc,isrc,tp,date):
     except:
         print('error inserting')
         db.rollback()
-def check(x,y,i,j,k,l,m,n,o):
+def check(x,y,z,i,j,k,l,m,n,o):
     try:
         cursor.execute("SELECT * FROM post WHERE t_src LIKE %s OR title LIKE %s ORDER BY created_date ASC",(x,y))
         datas = cursor.fetchall()
+        cursor.execute("SELECT * FROM blacklist WHERE i_no = %s",z)
+        blacks = cursor.fetchall()
         for data in datas:
             print("Found data: "+data[4])
-        if len(datas) >= 1:
+        if len(datas):
             print("Data Already saved in DB")
+        elif len(blacks) >= '1':
+            print("Data Blacklisted")
         else:
             insert(i,j,k,l,m,n,o)
             print("insert new data to table")
     except:
         print ("Error getting data for check")
         driver.close()
-def main(j):
-    #link = "https://nhentai.net/tag/stockings/?page="+str(j)
-    link = "https://nhentai.net/tag/stockings/?page="+str(j)
+def main(j,link):
     driver.get(link);
     time.sleep(1)
     box = driver.find_elements_by_class_name('gallery')
@@ -66,7 +68,7 @@ def main(j):
                 date2=date1[1].split(".")
                 fdate =date1[0]+" "+date2[0]
                 print(cover)
-                check(cover,title,title,artist[0],page,cover,img,type,fdate)
+                check(cover,title,img,title,artist[0],page,cover,img,type,fdate)
                 time.sleep(0.5)
                 driver.close()
                 driver.switch_to.window(driver.window_handles[0])
@@ -76,10 +78,12 @@ def main(j):
             print(str(i)+"error")
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
-
     j = j+1
+    link = "https://nhentai.net/tag/stockings/?page="+str(j)
     if j >= 20:
         j = 1
-    main(j)
-main(1)
+        link = "https://nhentai.net/?page="+str(j)
+    main(j,link)
+
+main(1,"https://nhentai.net/")
 db.close()
