@@ -4,16 +4,35 @@ from selenium.webdriver.common.keys import Keys
 import pymysql
 import time
 
-options = webdriver.ChromeOptions()
-prefs = {"profile.managed_default_content_settings.images":2}
+db = pymysql.connect(host='206.189.90.203',user='zun95',passwd='Hotdilvin95',db='h')
+cursor = db.cursor()
 
-options.add_experimental_option("prefs",prefs)
-options.add_argument("--window-size=100,100")#--start-maximized
-driver = webdriver.Chrome("D:/Documents/Career/eugene.club/chromedriver.exe",options=options)
-
-link = "https://nhentai.net/g/251115/"
-
-driver.get(link)
-
-title= driver.find_element_by_xpath("//div[@class='container']//div[@id='info']//h2[1]").text
-print("title: "+str(title))
+def analys_author():
+    i = 0
+    j = 0
+    print("program started")
+    cursor.execute("SELECT * FROM author")
+    authors = cursor.fetchall()
+    for author in authors:
+        i += 1
+        artist = author[1]
+        print("auth "+str(i)+" artist: "+str(artist))
+        cursor.execute("SELECT * FROM post")
+        posts = cursor.fetchall()
+        for post in posts:
+            j += 1
+            print("post "+str(j)+" artist: "+str(post[2]))
+            if str(artist) == str(post[2]):
+            #artist are post data,author[1] are author data
+            #[1] is eng [2] is japanese
+                print(str(post[2]+" to "+str(author[2])))
+                try:
+                    cursor.execute("UPDATE post SET author = %s WHERE author = %s",(author[2],post[2]))
+                    db.commit()
+                    print("UPDATE DONE.")
+                except:
+                    print("error UPDATE")
+                    db.rollback()
+        j = 0
+analys_author()
+db.close()

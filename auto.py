@@ -13,6 +13,34 @@ driver = webdriver.Chrome("D:/Documents/Career/eugene.club/chromedriver.exe",opt
 
 db = pymysql.connect(host='206.189.90.203',user='zun95',passwd='Hotdilvin95',db='h')
 cursor = db.cursor()
+
+def analys_author():
+    i = 0
+    j = 0
+    print("program started")
+    cursor.execute("SELECT * FROM author")
+    authors = cursor.fetchall()
+    for author in authors:
+        i += 1
+        artist = author[1]
+        print("auth "+str(i)+" artist: "+str(artist))
+        cursor.execute("SELECT * FROM post")
+        posts = cursor.fetchall()
+        for post in posts:
+            j += 1
+            print("post "+str(j)+" artist: "+str(post[2]))
+            if str(artist) == str(post[2]):
+            #artist are post data,author[1] are author data
+            #[1] is eng [2] is japanese
+                print(str(post[2]+" to "+str(author[2])))
+                try:
+                    cursor.execute("UPDATE post SET author = %s WHERE author = %s",(author[2],post[2]))
+                    db.commit()
+                    print("UPDATE DONE.")
+                except:
+                    print("error UPDATE")
+                    db.rollback()
+        j = 0
 def insert(tit,aut,page,tsrc,isrc,tp,date):
     try:
         cursor.execute("INSERT into post(title,author,page,t_src,i_no,i_type,created_date) VALUES(%s ,%s ,%s, %s, %s, %s, %s)",(tit,aut,page,tsrc,isrc,tp,date))
@@ -79,11 +107,12 @@ def main(j,link):
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
     j = j+1
-    link = "https://nhentai.net/tag/stockings/?page="+str(j)
-    if j >= 20:
+    link = "https://nhentai.net/?page="+str(j)
+    if j >= 100:
         j = 1
-        link = "https://nhentai.net/?page="+str(j)
+        link = "https://nhentai.net/tag/stockings?page="+str(j)
+        analys_author()
     main(j,link)
 
-main(1,"https://nhentai.net/")
+main(1,"https://nhentai.net/tag/stockings/?page=1")
 db.close()
