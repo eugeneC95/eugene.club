@@ -114,5 +114,5 @@ def main(j,link):
         analys_author()
     main(j,link)
 
-main(1,"https://nhentai.net/tag/stockings/?page=1")
+main(1,"https://nhentai.net/?page=1")
 db.close()
