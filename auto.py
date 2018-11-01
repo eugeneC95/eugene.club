@@ -41,6 +41,30 @@ def analys_author():
                     print("error UPDATE")
                     db.rollback()
         j = 0
+def retitle(data):
+    auth =""
+    tit =""
+    if "[" in data:
+        for l in range(len(data)):
+            if "[" == data[l]:
+                for m in range(l,len(data)):
+                    auth += data[m]
+                    if "]" == data[m]:
+                        data = data.replace(auth,"")
+                        auth =""
+                        break
+            if "(" in data:
+                if "(" == data[l]:
+                    for m in range(l,len(data)):
+                        tit +=data[m]
+                        if ")" == data[m]:
+                            data = data.replace(tit,"")
+                            tit =""
+                            break
+            elif "[" not in data:
+                data = data.replace(" ","")
+                return data
+                break
 def insert(tit,aut,page,tsrc,isrc,tp,date):
     try:
         cursor.execute("INSERT into post(title,author,page,t_src,i_no,i_type,created_date) VALUES(%s ,%s ,%s, %s, %s, %s, %s)",(tit,aut,page,tsrc,isrc,tp,date))
@@ -79,6 +103,7 @@ def main(j,link):
                 driver.switch_to.window(driver.window_handles[1])
                 driver.get(link)
                 title= driver.find_element_by_xpath("//div[@class='container']//div[@id='info']//h2").text
+                title = retitle(title)
                 artist= driver.find_element_by_xpath("//section[@id='tags']//div[4]//span[@class='tags']//a").text
                 artist = artist.split(' (')
                 page= driver.find_elements_by_xpath("//div[@class='container']//div[@class='thumb-container']")
@@ -108,7 +133,7 @@ def main(j,link):
             driver.switch_to.window(driver.window_handles[0])
     j = j+1
     link = "https://nhentai.net/?page="+str(j)
-    if j >= 100:
+    if j >= 15:
         j = 1
         link = "https://nhentai.net/tag/stockings?page="+str(j)
         analys_author()
