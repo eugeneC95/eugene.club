@@ -19,14 +19,17 @@ def retitle(data):
     tit =""
     if "[" in data:
         for l in range(len(data)):
-            if "[" == data[l]:
+            if "[" not in data and "(" not in data:
+                data = data.replace(" ","")
+                break
+            elif "[" == data[l]:
                 for m in range(l,len(data)):
                     auth += data[m]
                     if "]" == data[m]:
                         data = data.replace(auth,"")
                         auth =""
                         break
-            if "(" in data:
+            elif "(" in data:
                 if "(" == data[l]:
                     for m in range(l,len(data)):
                         tit +=data[m]
@@ -34,10 +37,8 @@ def retitle(data):
                             data = data.replace(tit,"")
                             tit =""
                             break
-            elif "[" not in data:
-                data = data.replace(" ","")
-                return data
-                break
+
+    return data
 def insert(tit,aut,page,tsrc,isrc,tp,date):
     try:
         cursor.execute("INSERT into post(title,author,page,t_src,i_no,i_type,created_date) VALUES(%s ,%s ,%s, %s, %s, %s, %s)",(tit,aut,page,tsrc,isrc,tp,date))

@@ -5,19 +5,22 @@ import pymysql
 import time
 
 
-data ="(C88) [KAMINENDO.CORP (あかざわRED)] でれパコ (アイドルマスターシンデレラガールズ) [中国翻訳]"
+data ="[三生万] 嫦娥造反记 (连载中)"
 auth =""
 tit =""
 if "[" in data:
     for l in range(len(data)):
-        if "[" == data[l]:
+        if "[" not in data and "(" not in data:
+            data = data.replace(" ","")
+            break
+        elif "[" == data[l]:
             for m in range(l,len(data)):
                 auth += data[m]
                 if "]" == data[m]:
                     data = data.replace(auth,"")
                     auth =""
                     break
-        if "(" in data:
+        elif "(" in data:
             if "(" == data[l]:
                 for m in range(l,len(data)):
                     tit +=data[m]
@@ -25,7 +28,5 @@ if "[" in data:
                         data = data.replace(tit,"")
                         tit =""
                         break
-        elif "[" not in data:
-            data = data.replace(" ","")
-            print(data)
-            break
+
+print(data)
