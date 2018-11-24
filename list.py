@@ -17,30 +17,28 @@ cursor = db.cursor()
 def retitle(data):
     auth =""
     tit =""
-    datas = []
-    if "(" or "[" in data:
+    if "[" in data:
         for l in range(len(data)):
-            if "[" == data[l]:
+            if "[" not in data and "(" not in data:
+                data = data.replace(" ","")
+                break
+            elif "[" == data[l]:
                 for m in range(l,len(data)):
                     auth += data[m]
                     if "]" == data[m]:
-                        datas.append(auth)
-                        auth = ""
+                        data = data.replace(auth,"")
+                        auth =""
                         break
-            elif "(" == data[l]:
-                for m in range(l,len(data)):
-                    auth += data[m]
-                    if ")" == data[m]:
-                        datas.append(auth)
-                        auth = ""
-                        break
-        try:
-            for i in range(len(datas)):
-                data = data.replace(datas[i],"")
-            data = data.replace(" ","")
-            return data
-        except Exception as e:
-            print("retitle error")
+            elif "(" in data:
+                if "(" == data[l]:
+                    for m in range(l,len(data)):
+                        tit +=data[m]
+                        if ")" == data[m]:
+                            data = data.replace(tit,"")
+                            tit =""
+                            break
+
+    return data
 def insert(tit,aut,page,tsrc,isrc,tp,date):
     try:
         cursor.execute("INSERT into book_data(title,author,page,t_src,i_no,i_type,pop,created_date) VALUES(%s ,%s ,%s, %s, %s, %s, %s, %s)",(tit,aut,page,tsrc,isrc,tp,'0',date))
@@ -106,7 +104,10 @@ def check(x,y,z,i,j,k,l,m,n,o):
         elif len(datas) and len(tags) >= 1:
             print("Data_Duplicated")
             print("Tag_Duplicated")
-        
+        elif len(datas) >= 1 and len(tags) == 0:
+            print("Data_Duplicated")
+            insert_tag(z,stocking,pantyhose,purelove,wetcloth,schoolgirl,fullcolor,darkskin,footjob,length,doujin,manga,drug,toys,bondage,rape,o,breast)
+            print("tag_inserted")
         elif len(datas) == 0 and len(tags) ==0:
             insert(i,j,k,l,m,n,o)
             print("book_inserted")
@@ -115,62 +116,43 @@ def check(x,y,z,i,j,k,l,m,n,o):
     except:
         print ("Error getting data for check")
         driver.close()
-def main(j,link):
+def main(link):
     driver.get(link);
-    box = driver.find_elements_by_class_name('gallery')
-    for i in range(1,len(box)):
-        try:
-            texts = driver.find_element_by_xpath("//div[@class='container index-container']//div["+str(i)+"]//a").text
-            if("Chinese" in texts or "化" in texts):
-                link = driver.find_element_by_xpath("//div[@class='container index-container']//div["+str(i)+"]//a[1]").get_attribute("href")
-                driver.execute_script("window.open('');")
-                driver.switch_to.window(driver.window_handles[1])
-                driver.get(link)
-                title= driver.find_element_by_xpath("//div[@class='container']//div[@id='info']//h2").text
-                title = retitle(title)
-                try:
-                    artist= driver.find_element_by_xpath("//section[@id='tags']//div[4]//span[@class='tags']//a").text
-                except NoSuchElementException:
-                    artist= driver.find_element_by_xpath("//section[@id='tags']//div[5]//span[@class='tags']//a").text
-                artist = artist.split(' (')
-                page= driver.find_elements_by_xpath("//div[@class='container']//div[@class='thumb-container']")
-                page=len(page)
-                cover= driver.find_element_by_xpath("//div[@id='cover']//img[1]").get_attribute('data-src')
-                if "png" in cover:
-                    type='png'
-                elif "jpg" in cover:
-                    type='jpg'
-                img_nos= cover.split("https://t.nhentai.net/galleries/")
-                img_no= img_nos[1].split("/cover")
-                img= str(img_no[0])
-                times= driver.find_element_by_xpath("//div[@id='info']//div[2]//time").get_attribute('title')
-                time1=times.split(" ")
-                dates = time1[0].split(",")
-                fdate = dates[0].split("/")
-                if time1[2] == "PM":
-                    timed=time1[1].split(":")
-                    hour = int(timed[0]) + 12
-                    if hour >= 24:
-                        hour = hour - 24
-                    ftime = str(hour)+":"+str(timed[1])+":"+str(timed[2])
-                elif time1[2] == "AM":
-                    ftime = time1[1]
-                fdate = fdate[2]+"-"+fdate[0]+"-"+fdate[1]+" "+ ftime
-                check(cover,title,img,title,artist[0],page,cover,img,type,fdate)
-                time.sleep(0.1)
-                driver.close()
-                driver.switch_to.window(driver.window_handles[0])
-            print(str(i)+"\n")
-        except NoSuchElementException:
-            print(str(i)+"error")
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
-    j = j+1
-    link = "https://nhentai.net/?page="+str(j)
-    if j >= 5:
-        j = 1
-        link = "https://nhentai.net/?page="+str(j)
-    main(j,link)
-
-main(1,"https://nhentai.net/?page=1")
-db.close()
+    try:
+        title= driver.find_element_by_xpath("//div[@class='container']//div[@id='info']//h2").text
+        title = retitle(title)
+        artist= driver.find_element_by_xpath("//section[@id='tags']//div[4]//span[@class='tags']//a").text
+        artist = artist.split(' (')
+        page= driver.find_elements_by_xpath("//div[@class='container']//div[@class='thumb-container']")
+        page=len(page)
+        cover= driver.find_element_by_xpath("//div[@id='cover']//img[1]").get_attribute('data-src')
+        if "png" in cover:
+            type='png'
+        elif "jpg" in cover:
+            type='jpg'
+        img_nos= cover.split("https://t.nhentai.net/galleries/")
+        img_no= img_nos[1].split("/cover")
+        img= str(img_no[0])
+        times= driver.find_element_by_xpath("//div[@id='info']//div[2]//time").get_attribute('title')
+        time1=times.split(" ")
+        dates = time1[0].split(",")
+        fdate = dates[0].split("/")
+        if time1[2] == "PM":
+            timed=time1[1].split(":")
+            hour = int(timed[0]) + 12
+            if hour >= 24:
+                hour = hour - 24
+            ftime = str(hour)+":"+str(timed[1])+":"+str(timed[2])
+        elif time1[2] == "AM":
+            ftime = time1[1]
+        fdate = fdate[2]+"-"+fdate[0]+"-"+fdate[1]+" "+ ftime
+        print(cover)
+        check(cover,title,img,title,artist[0],page,cover,img,type,fdate)
+    except NoSuchElementException:
+        print("error")
+list = []
+f=open("list.txt", "r")
+if f.mode == 'r':
+    data = f.readlines()
+    for line in data:
+        main(line)

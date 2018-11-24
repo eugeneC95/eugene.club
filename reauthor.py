@@ -10,13 +10,13 @@ def analys_author():
     i = 0
     j = 0
     print("program started")
-    cursor.execute("SELECT * FROM author")
+    cursor.execute("SELECT * FROM book_author")
     authors = cursor.fetchall()
     for author in authors:
         i += 1
         artist = author[1]
         print("auth "+str(i)+" artist: "+str(artist))
-        cursor.execute("SELECT * FROM post")
+        cursor.execute("SELECT * FROM book_data")
         posts = cursor.fetchall()
         for post in posts:
             j += 1
@@ -26,7 +26,7 @@ def analys_author():
             #[1] is eng [2] is japanese
                 print(str(post[2]+" to "+str(author[2])))
                 try:
-                    cursor.execute("UPDATE post SET author = %s WHERE author = %s",(author[2],post[2]))
+                    cursor.execute("UPDATE book_data SET author = %s WHERE author = %s",(author[2],post[2]))
                     db.commit()
                     print("UPDATE DONE.")
                 except:
