@@ -50,9 +50,9 @@ def insert(tit,aut,page,tsrc,isrc,tp,date):
     except:
         print('error inserting')
         db.rollback()
-def insert_tag(i_no,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,date,p):
+def insert_tag(i_no,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,date,p,q):
     try:
-        cursor.execute("INSERT into book_tag(i_no,stocking,pantyhose,purelove,wetcloth,schoolgirl,fullcolor,darkskin,footjob,length,doujinshi,manga,drug,toys,bondage,rape,created_date,breast,likes,unlikes)VALUES(%s ,%s ,%s, %s, %s, %s, %s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s)",(i_no,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,date,p,'0','0'))
+        cursor.execute("INSERT into book_tag(i_no,stocking,pantyhose,purelove,wetcloth,schoolgirl,fullcolor,darkskin,footjob,length,doujinshi,manga,drug,toys,bondage,rape,created_date,breast,loli,likes,unlikes)VALUES(%s ,%s ,%s, %s, %s, %s, %s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s ,%s)",(i_no,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,date,p,q,'0','0'))
         db.commit()
         print("tag_inserted")
     except:
@@ -60,11 +60,9 @@ def insert_tag(i_no,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,date,p):
         db.rollback()
 def check(x,y,z,i,j,k,l,m,n,o):
     try:
-        stocking,pantyhose,purelove,wetcloth,schoolgirl,fullcolor,darkskin,footjob,length,doujin,manga,drug,toys,bondage,rape,breast,likes,unlikes = "0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"
+        stocking,pantyhose,purelove,wetcloth,schoolgirl,fullcolor,darkskin,footjob,length,doujin,manga,drug,toys,bondage,rape,breast,loli,likes,unlikes = "0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"
         cursor.execute("SELECT * FROM book_data WHERE t_src LIKE %s OR title LIKE %s ORDER BY created_date ASC",(x,y))
         datas = cursor.fetchall()
-        cursor.execute("SELECT * FROM admin_blacklist WHERE i_no = %s",(z))
-        blacks = cursor.fetchall()
         cursor.execute("SELECT * FROM book_tag WHERE i_no = %s",(z))
         tags = cursor.fetchall()
         tagsz = driver.find_elements_by_xpath("//section[@id='tags']//span[@class='tags']")
@@ -99,20 +97,17 @@ def check(x,y,z,i,j,k,l,m,n,o):
                 rape = "1"
             if 'breast' in s.text:
                 breast = "1"
+            if 'loli' in s.text:
+                loli = "1"
             if k >= 30:
                 length = "1"
-        for data in datas:
-            print("Found: "+data[4])
-        if len(blacks) >= 1:
-            print("Data_Blacklisted")
-        elif len(datas) and len(tags) >= 1:
+        if len(datas) and len(tags) >= 1:
             print("Data_Duplicated")
             print("Tag_Duplicated")
-
-        elif len(datas) == 0 and len(tags) ==0:
+        elif len(datas) <= 0 and len(tags) <=0:
             insert(i,j,k,l,m,n,o)
             print("book_inserted")
-            insert_tag(z,stocking,pantyhose,purelove,wetcloth,schoolgirl,fullcolor,darkskin,footjob,length,doujin,manga,drug,toys,bondage,rape,o,breast)
+            insert_tag(z,stocking,pantyhose,purelove,wetcloth,schoolgirl,fullcolor,darkskin,footjob,length,doujin,manga,drug,toys,bondage,rape,o,breast,loli)
             print("tag_inserted")
     except:
         print ("Error getting data for check")
@@ -138,10 +133,6 @@ def main(j,link):
                 page= driver.find_elements_by_xpath("//div[@class='container']//div[@class='thumb-container']")
                 page=len(page)
                 cover= driver.find_element_by_xpath("//div[@id='cover']//img[1]").get_attribute('data-src')
-                if "png" in cover:
-                    type='png'
-                elif "jpg" in cover:
-                    type='jpg'
                 img_nos= cover.split("https://t.nhentai.net/galleries/")
                 img_no= img_nos[1].split("/cover")
                 img= str(img_no[0])
@@ -158,6 +149,13 @@ def main(j,link):
                 elif time1[2] == "AM":
                     ftime = time1[1]
                 fdate = fdate[2]+"-"+fdate[0]+"-"+fdate[1]+" "+ ftime
+                link += "1/"
+                driver.get(link)
+                bg = driver.find_element_by_xpath("//img[@class='fit-horizontal']").get_attribute('src')
+                if "png" in bg:
+                    type='png'
+                elif "jpg" in bg:
+                    type='jpg'
                 check(cover,title,img,title,artist[0],page,cover,img,type,fdate)
                 time.sleep(0.1)
                 driver.close()
@@ -167,14 +165,9 @@ def main(j,link):
             print(str(i)+"error")
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
-def counter():
-    j = 0
-    while(j < 3):
-        j += 1
-        print("Page" + str(j))
-        main(j,"https://nhentai.net/?page="+str(j))
-    driver.close()
-schedule.every().hour.do(counter)
-while True:
-    schedule.run_pending()
-    time.sleep(5)
+j = 0
+while(j < 50):
+    j += 1
+    print("Page" + str(j))
+    main(j,"https://nhentai.net/?page="+str(j))
+driver.close()

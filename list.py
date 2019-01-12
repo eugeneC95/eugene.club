@@ -17,28 +17,31 @@ cursor = db.cursor()
 def retitle(data):
     auth =""
     tit =""
-    if "[" in data:
+    datas = []
+    if "(" or "[" in data:
         for l in range(len(data)):
-            if "[" not in data and "(" not in data:
-                data = data.replace(" ","")
-                break
-            elif "[" == data[l]:
+            if "[" == data[l]:
                 for m in range(l,len(data)):
                     auth += data[m]
                     if "]" == data[m]:
-                        data = data.replace(auth,"")
-                        auth =""
+                        datas.append(auth)
+                        auth = ""
                         break
-            elif "(" in data:
-                if "(" == data[l]:
-                    for m in range(l,len(data)):
-                        tit +=data[m]
-                        if ")" == data[m]:
-                            data = data.replace(tit,"")
-                            tit =""
-                            break
+            elif "(" == data[l]:
+                for m in range(l,len(data)):
+                    auth += data[m]
+                    if ")" == data[m]:
+                        datas.append(auth)
+                        auth = ""
+                        break
+        try:
+            for i in range(len(datas)):
+                data = data.replace(datas[i],"")
+            data = data.replace(" ","")
+            return data
+        except Exception as e:
+            print("retitle error")
 
-    return data
 def insert(tit,aut,page,tsrc,isrc,tp,date):
     try:
         cursor.execute("INSERT into book_data(title,author,page,t_src,i_no,i_type,pop,created_date) VALUES(%s ,%s ,%s, %s, %s, %s, %s, %s)",(tit,aut,page,tsrc,isrc,tp,'0',date))
@@ -141,7 +144,7 @@ def main(link):
             timed=time1[1].split(":")
             hour = int(timed[0]) + 12
             if hour >= 24:
-                hour = hour - 24
+                hour = hour - 12
             ftime = str(hour)+":"+str(timed[1])+":"+str(timed[2])
         elif time1[2] == "AM":
             ftime = time1[1]
